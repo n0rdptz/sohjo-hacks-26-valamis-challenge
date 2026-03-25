@@ -1,10 +1,14 @@
 "use client";
 
 import { createContext, useContext, useState, useCallback, type ReactNode } from "react";
-import type { ParsedGithubRepo, AppState } from "@/types";
+import type { ParsedGithubRepo, GithubAnalysisResult } from "@/types";
 
-interface AppStateContextValue extends AppState {
+interface AppStateContextValue {
+  parsedRepo: ParsedGithubRepo | null;
+  analysis: GithubAnalysisResult | null;
+  loadedAt: string | null;
   setRepo: (repo: ParsedGithubRepo) => void;
+  setAnalysis: (result: GithubAnalysisResult) => void;
   reset: () => void;
 }
 
@@ -12,17 +16,28 @@ const AppStateContext = createContext<AppStateContextValue | undefined>(undefine
 
 export function AppStateProvider({ children }: { children: ReactNode }) {
   const [parsedRepo, setParsedRepo] = useState<ParsedGithubRepo | null>(null);
+  const [analysis, setAnalysisState] = useState<GithubAnalysisResult | null>(null);
+  const [loadedAt, setLoadedAt] = useState<string | null>(null);
 
   const setRepo = useCallback((repo: ParsedGithubRepo) => {
     setParsedRepo(repo);
   }, []);
 
+  const setAnalysis = useCallback((result: GithubAnalysisResult) => {
+    setAnalysisState(result);
+    setLoadedAt(new Date().toISOString());
+  }, []);
+
   const reset = useCallback(() => {
     setParsedRepo(null);
+    setAnalysisState(null);
+    setLoadedAt(null);
   }, []);
 
   return (
-    <AppStateContext.Provider value={{ parsedRepo, setRepo, reset }}>
+    <AppStateContext.Provider
+      value={{ parsedRepo, analysis, loadedAt, setRepo, setAnalysis, reset }}
+    >
       {children}
     </AppStateContext.Provider>
   );
