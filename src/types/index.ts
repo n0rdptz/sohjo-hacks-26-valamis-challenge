@@ -143,12 +143,39 @@ export interface ContributorSkillProfile {
   skillScores: SkillScore[];
 }
 
+export type GapSeverity = "none" | "low" | "medium" | "high";
+export type GapPriority = "low" | "medium" | "high" | "critical";
+
+export interface SkillGap {
+  contributorLogin: string;
+  skillId: string;
+  actualScore: number;
+  targetScore: number;
+  minimumScore: number;
+  gapAmount: number;
+  belowMinimum: boolean;
+  severity: GapSeverity;
+  priority: GapPriority;
+  confidence: number;
+  signalCount: number;
+  explanation: string;
+}
+
+export interface ContributorGapProfile {
+  contributorLogin: string;
+  gaps: SkillGap[];
+  topGap: SkillGap | null;
+  totalGapCount: number;
+  highPriorityGapCount: number;
+}
+
 export interface AppState {
   parsedRepo: ParsedGithubRepo | null;
   analysis: GithubAnalysisResult | null;
   rawEvidence: RawEvidence[];
   skillSignals: SkillSignal[];
   contributorProfiles: ContributorSkillProfile[];
+  contributorGapProfiles: ContributorGapProfile[];
   selectedRoleId: string;
   loadedAt: string | null;
 }
