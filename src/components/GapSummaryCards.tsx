@@ -6,6 +6,7 @@ import Typography from "@mui/material/Typography";
 import { useAppState } from "@/context/AppStateContext";
 import { getRoleById } from "@/lib/skill-taxonomy";
 import { countTotalGaps, countHighPriorityGaps } from "@/lib/gaps-ui";
+import { countContributorsWithCriticalGaps } from "@/lib/gaps-page-helpers";
 
 export default function GapSummaryCards() {
   const { contributorGapProfiles, selectedRoleId } = useAppState();
@@ -16,12 +17,13 @@ export default function GapSummaryCards() {
     { label: "Contributors", value: String(contributorGapProfiles.length) },
     { label: "Total Gaps", value: String(countTotalGaps(contributorGapProfiles)) },
     { label: "Critical / High", value: String(countHighPriorityGaps(contributorGapProfiles)) },
+    { label: "At Risk", value: String(countContributorsWithCriticalGaps(contributorGapProfiles)) },
   ];
 
   return (
     <Grid container spacing={2} sx={{ mb: 4 }}>
       {items.map((item) => (
-        <Grid key={item.label} size={{ xs: 6, md: 3 }}>
+        <Grid key={item.label} size={{ xs: 6, sm: 4 }}>
           <Paper variant="outlined" sx={{ p: 2, textAlign: "center" }}>
             <Typography variant="body2" color="text.secondary">
               {item.label}

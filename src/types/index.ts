@@ -169,6 +169,35 @@ export interface ContributorGapProfile {
   highPriorityGapCount: number;
 }
 
+export type LearningLevel = "foundation" | "intermediate" | "advanced";
+export type LearningFormat = "course" | "guide" | "practice" | "checklist";
+
+export interface LearningContentItem {
+  id: string;
+  skillId: string;
+  title: string;
+  description: string;
+  level: LearningLevel;
+  format: LearningFormat;
+  estimatedMinutes: number;
+  url?: string;
+}
+
+export interface SkillRecommendation {
+  contributorLogin: string;
+  skillId: string;
+  gapSeverity: GapSeverity;
+  gapPriority: GapPriority;
+  recommendedItems: LearningContentItem[];
+  reason: string;
+}
+
+export interface ContributorRecommendationProfile {
+  contributorLogin: string;
+  recommendations: SkillRecommendation[];
+  topRecommendation: SkillRecommendation | null;
+}
+
 export interface AppState {
   parsedRepo: ParsedGithubRepo | null;
   analysis: GithubAnalysisResult | null;
@@ -176,6 +205,7 @@ export interface AppState {
   skillSignals: SkillSignal[];
   contributorProfiles: ContributorSkillProfile[];
   contributorGapProfiles: ContributorGapProfile[];
+  contributorRecommendationProfiles: ContributorRecommendationProfile[];
   selectedRoleId: string;
   loadedAt: string | null;
 }

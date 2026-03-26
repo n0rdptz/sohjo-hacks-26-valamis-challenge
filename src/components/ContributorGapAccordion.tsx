@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import Accordion from "@mui/material/Accordion";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
@@ -13,20 +14,39 @@ import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
-import LinearProgress from "@mui/material/LinearProgress";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import GapRow from "./GapRow";
+import { buildContributorSummary } from "@/lib/gaps-page-helpers";
+import type { ContributorGapProfile, GithubContributor, SkillRecommendation } from "@/types";
 import { getSkillById } from "@/lib/skill-taxonomy";
-import { formatScore } from "@/lib/skills-ui";
-import { getSeverityColor, getPriorityColor } from "@/lib/gaps-ui";
-import type { ContributorGapProfile, GithubContributor } from "@/types";
 
 interface Props {
   gapProfile: ContributorGapProfile;
   contributor?: GithubContributor;
+  recommendations?: Map<string, SkillRecommendation>;
+  showHealthy?: boolean;
+  highPriorityOnly?: boolean;
   defaultExpanded?: boolean;
 }
 
-export default function ContributorGapAccordion({ gapProfile, contributor, defaultExpanded = false }: Props) {
+export default function ContributorGapAccordion({
+  gapProfile,
+  contributor,
+  recommendations,
+  showHealthy = false,
+  highPriorityOnly = false,
+  defaultExpanded = false,
+}: Props) {
+  const visibleGaps = useMemo(() => {
+    return gapProfile.gaps.filter((g) => {
+      if (highPriorityOnly) return g.priority === "high" || g.priority === "critical";
+      if (!showHealthy && g.severity === "none") return false;
+      return true;
+    });
+  }, [gapProfile.gaps, showHealthy, highPriorityOnly]);
+
+  const summary = buildContributorSummary(gapProfile);
+
   return (
     <Accordion defaultExpanded={defaultExpanded}>
       <AccordionSummary expandIcon={<ExpandMoreIcon />}>
@@ -41,11 +61,7 @@ export default function ContributorGapAccordion({ gapProfile, contributor, defau
             color={gapProfile.totalGapCount > 0 ? "warning" : "success"}
           />
           {gapProfile.highPriorityGapCount > 0 && (
-            <Chip
-              label={`${gapProfile.highPriorityGapCount} critical/high`}
-              size="small"
-              color="error"
-            />
+            <Chip label={`${gapProfile.highPriorityGapCount} critical/high`} size="small" color="error" />
           )}
           {gapProfile.topGap && (
             <Typography variant="body2" color="text.secondary">
@@ -55,62 +71,39 @@ export default function ContributorGapAccordion({ gapProfile, contributor, defau
         </Box>
       </AccordionSummary>
       <AccordionDetails>
-        <TableContainer>
-          <Table size="small">
-            <TableHead>
-              <TableRow>
-                <TableCell>Skill</TableCell>
-                <TableCell sx={{ minWidth: 140 }}>Actual</TableCell>
-                <TableCell align="center">Target</TableCell>
-                <TableCell align="center">Min</TableCell>
-                <TableCell align="center">Severity</TableCell>
-                <TableCell align="center">Priority</TableCell>
-                <TableCell>Explanation</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {gapProfile.gaps.map((gap) => {
-                const skill = getSkillById(gap.skillId);
-                const pct = Math.round(gap.actualScore * 100);
-                return (
-                  <TableRow key={gap.skillId}>
-                    <TableCell>
-                      <Typography variant="body2" fontWeight={500}>
-                        {skill?.label ?? gap.skillId}
-                      </Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                        <LinearProgress
-                          variant="determinate"
-                          value={pct}
-                          color={gap.severity === "none" ? "success" : gap.severity === "high" ? "error" : "warning"}
-                          sx={{ flexGrow: 1, height: 8, borderRadius: 4 }}
-                        />
-                        <Typography variant="body2" sx={{ minWidth: 36, textAlign: "right" }}>
-                          {formatScore(gap.actualScore)}
-                        </Typography>
-                      </Box>
-                    </TableCell>
-                    <TableCell align="center">{formatScore(gap.targetScore)}</TableCell>
-                    <TableCell align="center">{formatScore(gap.minimumScore)}</TableCell>
-                    <TableCell align="center">
-                      <Chip label={gap.severity} size="small" color={getSeverityColor(gap.severity)} />
-                    </TableCell>
-                    <TableCell align="center">
-                      <Chip label={gap.priority} size="small" color={getPriorityColor(gap.priority)} />
-                    </TableCell>
-                    <TableCell>
-                      <Typography variant="body2" color="text.secondary">
-                        {gap.explanation}
-                      </Typography>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
-        </TableContainer>
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+          {summary}
+        </Typography>
+        {visibleGaps.length === 0 ? (
+          <Typography variant="body2" color="text.secondary">
+            No gaps match the current filter.
+          </Typography>
+        ) : (
+          <TableContainer>
+            <Table size="small">
+              <TableHead>
+                <TableRow>
+                  <TableCell>Skill</TableCell>
+                  <TableCell sx={{ minWidth: 140 }}>Actual</TableCell>
+                  <TableCell align="center">Target</TableCell>
+                  <TableCell align="center">Min</TableCell>
+                  <TableCell align="center">Severity</TableCell>
+                  <TableCell align="center">Priority</TableCell>
+                  <TableCell>Explanation</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {visibleGaps.map((gap) => (
+                  <GapRow
+                    key={gap.skillId}
+                    gap={gap}
+                    recommendation={recommendations?.get(gap.skillId)}
+                  />
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        )}
       </AccordionDetails>
     </Accordion>
   );
