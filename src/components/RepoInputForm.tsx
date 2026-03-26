@@ -11,7 +11,7 @@ import { useAppState } from "@/context/AppStateContext";
 import type { GithubAnalysisResult, ApiErrorResponse } from "@/types";
 
 export default function RepoInputForm() {
-  const { setRepo, setAnalysis } = useAppState();
+  const { setRepo, setAnalysis, loadDemoData } = useAppState();
   const [url, setUrl] = useState("");
   const [validationError, setValidationError] = useState("");
   const [apiError, setApiError] = useState("");
@@ -88,9 +88,14 @@ export default function RepoInputForm() {
         {loading ? <CircularProgress size={24} color="inherit" /> : "Analyze"}
       </Button>
       {apiError && (
-        <Alert severity="error" onClose={() => setApiError("")}>
-          {apiError}
-        </Alert>
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+          <Alert severity="error" onClose={() => setApiError("")}>
+            {apiError}
+          </Alert>
+          <Button variant="text" size="small" onClick={loadDemoData}>
+            Use demo dataset instead
+          </Button>
+        </Box>
       )}
     </Box>
   );

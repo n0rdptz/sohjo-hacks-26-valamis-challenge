@@ -3,6 +3,8 @@
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import Box from "@mui/material/Box";
+import Chip from "@mui/material/Chip";
+import Divider from "@mui/material/Divider";
 import Drawer from "@mui/material/Drawer";
 import List from "@mui/material/List";
 import ListItemButton from "@mui/material/ListItemButton";
@@ -15,6 +17,7 @@ import PeopleIcon from "@mui/icons-material/People";
 import CodeIcon from "@mui/icons-material/Code";
 import TrendingDownIcon from "@mui/icons-material/TrendingDown";
 import GridOnIcon from "@mui/icons-material/GridOn";
+import { useAppState } from "@/context/AppStateContext";
 
 const DRAWER_WIDTH = 240;
 
@@ -28,6 +31,7 @@ const NAV_ITEMS = [
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const { parsedRepo, isDemoMode } = useAppState();
 
   return (
     <Box sx={{ display: "flex", minHeight: "100vh" }}>
@@ -60,6 +64,21 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             </ListItemButton>
           ))}
         </List>
+
+        {parsedRepo && (
+          <>
+            <Divider sx={{ mt: "auto" }} />
+            <Box sx={{ p: 2 }}>
+              <Typography variant="caption" color="text.secondary" display="block">
+                Analyzing
+              </Typography>
+              <Typography variant="body2" fontWeight={500} noWrap>
+                {parsedRepo.owner}/{parsedRepo.repo}
+              </Typography>
+              {isDemoMode && <Chip label="Demo" size="small" color="secondary" sx={{ mt: 0.5 }} />}
+            </Box>
+          </>
+        )}
       </Drawer>
 
       <Box

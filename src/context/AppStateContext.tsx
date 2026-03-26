@@ -16,6 +16,7 @@ import { detectSkillGaps } from "@/lib/gap-engine";
 import { generateRecommendations } from "@/lib/recommendation-engine";
 import { LEARNING_CATALOG } from "@/lib/learning-catalog";
 import { DEFAULT_ROLE_ID, SKILL_DEFINITIONS, getRoleById } from "@/lib/skill-taxonomy";
+import { DEMO_PARSED_REPO, DEMO_ANALYSIS_RESULT } from "@/lib/demo-data";
 
 interface AppStateContextValue {
   parsedRepo: ParsedGithubRepo | null;
@@ -25,10 +26,12 @@ interface AppStateContextValue {
   contributorProfiles: ContributorSkillProfile[];
   contributorGapProfiles: ContributorGapProfile[];
   contributorRecommendationProfiles: ContributorRecommendationProfile[];
+  isDemoMode: boolean;
   selectedRoleId: string;
   loadedAt: string | null;
   setRepo: (repo: ParsedGithubRepo) => void;
   setAnalysis: (result: GithubAnalysisResult) => void;
+  loadDemoData: () => void;
   reset: () => void;
 }
 
@@ -43,6 +46,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   const [contributorGapProfiles, setContributorGapProfiles] = useState<ContributorGapProfile[]>([]);
   const [contributorRecommendationProfiles, setContributorRecommendationProfiles] =
     useState<ContributorRecommendationProfile[]>([]);
+  const [isDemoMode, setIsDemoMode] = useState(false);
   const [selectedRoleId] = useState<string>(DEFAULT_ROLE_ID);
   const [loadedAt, setLoadedAt] = useState<string | null>(null);
 
@@ -50,7 +54,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     setParsedRepo(repo);
   }, []);
 
-  const setAnalysis = useCallback((result: GithubAnalysisResult) => {
+  const runPipeline = useCallback((result: GithubAnalysisResult) => {
     setAnalysisState(result);
     const evidence = normalizeGithubDataToEvidence(result);
     setRawEvidence(evidence);
@@ -67,6 +71,17 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     setLoadedAt(new Date().toISOString());
   }, []);
 
+  const setAnalysis = useCallback((result: GithubAnalysisResult) => {
+    setIsDemoMode(false);
+    runPipeline(result);
+  }, [runPipeline]);
+
+  const loadDemoData = useCallback(() => {
+    setParsedRepo({ ...DEMO_PARSED_REPO, parsedAt: new Date().toISOString() });
+    setIsDemoMode(true);
+    runPipeline(DEMO_ANALYSIS_RESULT);
+  }, [runPipeline]);
+
   const reset = useCallback(() => {
     setParsedRepo(null);
     setAnalysisState(null);
@@ -75,6 +90,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     setContributorProfiles([]);
     setContributorGapProfiles([]);
     setContributorRecommendationProfiles([]);
+    setIsDemoMode(false);
     setLoadedAt(null);
   }, []);
 
@@ -83,7 +99,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       value={{
         parsedRepo, analysis, rawEvidence, skillSignals, contributorProfiles,
         contributorGapProfiles, contributorRecommendationProfiles,
-        selectedRoleId, loadedAt, setRepo, setAnalysis, reset,
+        isDemoMode, selectedRoleId, loadedAt, setRepo, setAnalysis, loadDemoData, reset,
       }}
     >
       {children}

@@ -7,6 +7,7 @@ import Alert from "@mui/material/Alert";
 import Switch from "@mui/material/Switch";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import { useAppState } from "@/context/AppStateContext";
+import PageHeader from "@/components/PageHeader";
 import GapSummaryCards from "@/components/GapSummaryCards";
 import TopRisksList from "@/components/TopRisksList";
 import ContributorGapAccordion from "@/components/ContributorGapAccordion";
@@ -52,10 +53,11 @@ export default function GapsPage() {
 
   return (
     <Box sx={{ py: 4 }}>
-      <Typography variant="h4" gutterBottom>Skill Gaps</Typography>
-      <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-        Compare inferred contributor capabilities against the target role and surface the most important development needs.
-      </Typography>
+      <PageHeader
+        title="Skill Gaps"
+        subtitle="Compare inferred contributor capabilities against the target role and surface the most important development needs."
+        infoBanner="Gaps are detected by comparing inferred capability signals against the target role model."
+      />
 
       {!analysis && (
         <Alert severity="info">

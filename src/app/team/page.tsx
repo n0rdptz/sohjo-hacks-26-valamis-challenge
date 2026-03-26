@@ -16,6 +16,7 @@ import {
   buildTeamSkillSummaries,
   buildTeamContributorSummaries,
 } from "@/lib/team-heatmap";
+import PageHeader from "@/components/PageHeader";
 import TeamHeatmapTable from "@/components/TeamHeatmapTable";
 import TeamSkillInsights from "@/components/TeamSkillInsights";
 import TeamContributorInsights from "@/components/TeamContributorInsights";
@@ -68,10 +69,11 @@ export default function TeamPage() {
 
   return (
     <Box sx={{ py: 4 }}>
-      <Typography variant="h4" gutterBottom>Team Heatmap</Typography>
-      <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-        View team-wide capability coverage, identify weak spots, and spot high-risk skill areas at a glance.
-      </Typography>
+      <PageHeader
+        title="Team Heatmap"
+        subtitle="View team-wide capability coverage, identify weak spots, and spot high-risk skill areas at a glance."
+        infoBanner="This heatmap identifies team-wide weak spots and concentrated development risks."
+      />
 
       {!analysis && (
         <Alert severity="info">

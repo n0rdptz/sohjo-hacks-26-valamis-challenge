@@ -17,6 +17,7 @@ import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import { useAppState } from "@/context/AppStateContext";
 import { SKILL_DEFINITIONS, getRoleById, getSkillById } from "@/lib/skill-taxonomy";
+import PageHeader from "@/components/PageHeader";
 import SkillsSummaryCards from "@/components/SkillsSummaryCards";
 import ContributorSkillsAccordion from "@/components/ContributorSkillsAccordion";
 import type { ImportanceLevel, GithubContributor } from "@/types";
@@ -53,10 +54,11 @@ export default function SkillsPage() {
 
   return (
     <Box sx={{ py: 4 }}>
-      <Typography variant="h4" gutterBottom>Skill Profiles</Typography>
-      <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-        Inferred skill assessments for each contributor based on repository evidence.
-      </Typography>
+      <PageHeader
+        title="Skill Profiles"
+        subtitle="Inferred skill assessments for each contributor based on repository evidence."
+        infoBanner="These profiles are inferred from repository evidence and should be interpreted as probabilistic signals, not absolute truth."
+      />
 
       {/* Empty state */}
       {!analysis && (
