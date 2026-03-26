@@ -1,14 +1,23 @@
 "use client";
 
 import { createContext, useContext, useState, useCallback, type ReactNode } from "react";
-import type { ParsedGithubRepo, GithubAnalysisResult, RawEvidence } from "@/types";
+import type {
+  ParsedGithubRepo,
+  GithubAnalysisResult,
+  RawEvidence,
+  SkillSignal,
+  ContributorSkillProfile,
+} from "@/types";
 import { normalizeGithubDataToEvidence } from "@/lib/evidence-normalizer";
-import { DEFAULT_ROLE_ID } from "@/lib/skill-taxonomy";
+import { generateSkillSignals, aggregateSkillScores } from "@/lib/scoring-engine";
+import { DEFAULT_ROLE_ID, SKILL_DEFINITIONS } from "@/lib/skill-taxonomy";
 
 interface AppStateContextValue {
   parsedRepo: ParsedGithubRepo | null;
   analysis: GithubAnalysisResult | null;
   rawEvidence: RawEvidence[];
+  skillSignals: SkillSignal[];
+  contributorProfiles: ContributorSkillProfile[];
   selectedRoleId: string;
   loadedAt: string | null;
   setRepo: (repo: ParsedGithubRepo) => void;
@@ -22,6 +31,8 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   const [parsedRepo, setParsedRepo] = useState<ParsedGithubRepo | null>(null);
   const [analysis, setAnalysisState] = useState<GithubAnalysisResult | null>(null);
   const [rawEvidence, setRawEvidence] = useState<RawEvidence[]>([]);
+  const [skillSignals, setSkillSignals] = useState<SkillSignal[]>([]);
+  const [contributorProfiles, setContributorProfiles] = useState<ContributorSkillProfile[]>([]);
   const [selectedRoleId] = useState<string>(DEFAULT_ROLE_ID);
   const [loadedAt, setLoadedAt] = useState<string | null>(null);
 
@@ -31,7 +42,11 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
 
   const setAnalysis = useCallback((result: GithubAnalysisResult) => {
     setAnalysisState(result);
-    setRawEvidence(normalizeGithubDataToEvidence(result));
+    const evidence = normalizeGithubDataToEvidence(result);
+    setRawEvidence(evidence);
+    const signals = generateSkillSignals(evidence);
+    setSkillSignals(signals);
+    setContributorProfiles(aggregateSkillScores(signals, SKILL_DEFINITIONS));
     setLoadedAt(new Date().toISOString());
   }, []);
 
@@ -39,12 +54,17 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     setParsedRepo(null);
     setAnalysisState(null);
     setRawEvidence([]);
+    setSkillSignals([]);
+    setContributorProfiles([]);
     setLoadedAt(null);
   }, []);
 
   return (
     <AppStateContext.Provider
-      value={{ parsedRepo, analysis, rawEvidence, selectedRoleId, loadedAt, setRepo, setAnalysis, reset }}
+      value={{
+        parsedRepo, analysis, rawEvidence, skillSignals, contributorProfiles,
+        selectedRoleId, loadedAt, setRepo, setAnalysis, reset,
+      }}
     >
       {children}
     </AppStateContext.Provider>

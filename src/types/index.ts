@@ -116,10 +116,39 @@ export interface EvidenceSkillMapping {
   rationale: string;
 }
 
+export interface SkillSignal {
+  id: string;
+  contributorLogin: string;
+  skillId: string;
+  sourceEvidenceId: string;
+  sourceEvidenceType: RawEvidenceType;
+  score: number;
+  confidence: number;
+  weight: number;
+  explanation: string;
+}
+
+export interface SkillScore {
+  contributorLogin: string;
+  skillId: string;
+  rawScore: number;
+  normalizedScore: number;
+  confidence: number;
+  signalCount: number;
+  summary: string;
+}
+
+export interface ContributorSkillProfile {
+  contributorLogin: string;
+  skillScores: SkillScore[];
+}
+
 export interface AppState {
   parsedRepo: ParsedGithubRepo | null;
   analysis: GithubAnalysisResult | null;
   rawEvidence: RawEvidence[];
+  skillSignals: SkillSignal[];
+  contributorProfiles: ContributorSkillProfile[];
   selectedRoleId: string;
   loadedAt: string | null;
 }
