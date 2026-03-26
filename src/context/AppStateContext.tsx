@@ -3,11 +3,13 @@
 import { createContext, useContext, useState, useCallback, type ReactNode } from "react";
 import type { ParsedGithubRepo, GithubAnalysisResult, RawEvidence } from "@/types";
 import { normalizeGithubDataToEvidence } from "@/lib/evidence-normalizer";
+import { DEFAULT_ROLE_ID } from "@/lib/skill-taxonomy";
 
 interface AppStateContextValue {
   parsedRepo: ParsedGithubRepo | null;
   analysis: GithubAnalysisResult | null;
   rawEvidence: RawEvidence[];
+  selectedRoleId: string;
   loadedAt: string | null;
   setRepo: (repo: ParsedGithubRepo) => void;
   setAnalysis: (result: GithubAnalysisResult) => void;
@@ -20,6 +22,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   const [parsedRepo, setParsedRepo] = useState<ParsedGithubRepo | null>(null);
   const [analysis, setAnalysisState] = useState<GithubAnalysisResult | null>(null);
   const [rawEvidence, setRawEvidence] = useState<RawEvidence[]>([]);
+  const [selectedRoleId] = useState<string>(DEFAULT_ROLE_ID);
   const [loadedAt, setLoadedAt] = useState<string | null>(null);
 
   const setRepo = useCallback((repo: ParsedGithubRepo) => {
@@ -41,7 +44,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
 
   return (
     <AppStateContext.Provider
-      value={{ parsedRepo, analysis, rawEvidence, loadedAt, setRepo, setAnalysis, reset }}
+      value={{ parsedRepo, analysis, rawEvidence, selectedRoleId, loadedAt, setRepo, setAnalysis, reset }}
     >
       {children}
     </AppStateContext.Provider>

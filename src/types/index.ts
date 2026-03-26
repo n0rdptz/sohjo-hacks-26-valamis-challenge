@@ -84,9 +84,42 @@ export interface RawEvidence {
   description: string;
 }
 
+export type SkillCategory = "frontend" | "engineering";
+export type SkillPriority = "core" | "secondary";
+export type ImportanceLevel = "high" | "medium" | "low";
+
+export interface SkillDefinition {
+  id: string;
+  label: string;
+  description: string;
+  category: SkillCategory;
+  priority: SkillPriority;
+}
+
+export interface RoleSkillRequirement {
+  skillId: string;
+  targetScore: number;
+  minimumScore: number;
+  importance: ImportanceLevel;
+}
+
+export interface RoleDefinition {
+  id: string;
+  label: string;
+  description: string;
+  requiredSkills: RoleSkillRequirement[];
+}
+
+export interface EvidenceSkillMapping {
+  evidenceType: RawEvidenceType;
+  skillIds: string[];
+  rationale: string;
+}
+
 export interface AppState {
   parsedRepo: ParsedGithubRepo | null;
   analysis: GithubAnalysisResult | null;
   rawEvidence: RawEvidence[];
+  selectedRoleId: string;
   loadedAt: string | null;
 }
