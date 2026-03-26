@@ -1,11 +1,13 @@
 "use client";
 
 import { createContext, useContext, useState, useCallback, type ReactNode } from "react";
-import type { ParsedGithubRepo, GithubAnalysisResult } from "@/types";
+import type { ParsedGithubRepo, GithubAnalysisResult, RawEvidence } from "@/types";
+import { normalizeGithubDataToEvidence } from "@/lib/evidence-normalizer";
 
 interface AppStateContextValue {
   parsedRepo: ParsedGithubRepo | null;
   analysis: GithubAnalysisResult | null;
+  rawEvidence: RawEvidence[];
   loadedAt: string | null;
   setRepo: (repo: ParsedGithubRepo) => void;
   setAnalysis: (result: GithubAnalysisResult) => void;
@@ -17,6 +19,7 @@ const AppStateContext = createContext<AppStateContextValue | undefined>(undefine
 export function AppStateProvider({ children }: { children: ReactNode }) {
   const [parsedRepo, setParsedRepo] = useState<ParsedGithubRepo | null>(null);
   const [analysis, setAnalysisState] = useState<GithubAnalysisResult | null>(null);
+  const [rawEvidence, setRawEvidence] = useState<RawEvidence[]>([]);
   const [loadedAt, setLoadedAt] = useState<string | null>(null);
 
   const setRepo = useCallback((repo: ParsedGithubRepo) => {
@@ -25,18 +28,20 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
 
   const setAnalysis = useCallback((result: GithubAnalysisResult) => {
     setAnalysisState(result);
+    setRawEvidence(normalizeGithubDataToEvidence(result));
     setLoadedAt(new Date().toISOString());
   }, []);
 
   const reset = useCallback(() => {
     setParsedRepo(null);
     setAnalysisState(null);
+    setRawEvidence([]);
     setLoadedAt(null);
   }, []);
 
   return (
     <AppStateContext.Provider
-      value={{ parsedRepo, analysis, loadedAt, setRepo, setAnalysis, reset }}
+      value={{ parsedRepo, analysis, rawEvidence, loadedAt, setRepo, setAnalysis, reset }}
     >
       {children}
     </AppStateContext.Provider>

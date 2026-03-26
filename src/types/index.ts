@@ -64,8 +64,29 @@ export interface ApiErrorResponse {
   details?: string;
 }
 
+export type RawEvidenceType =
+  | "commit_authored"
+  | "pr_opened"
+  | "file_touched"
+  | "testing_file_detected"
+  | "typescript_usage_detected"
+  | "react_hooks_detected"
+  | "state_management_detected"
+  | "async_code_detected";
+
+export interface RawEvidence {
+  id: string;
+  contributorLogin: string;
+  type: RawEvidenceType;
+  timestamp?: string;
+  metadata: Record<string, unknown>;
+  source: "github";
+  description: string;
+}
+
 export interface AppState {
   parsedRepo: ParsedGithubRepo | null;
   analysis: GithubAnalysisResult | null;
+  rawEvidence: RawEvidence[];
   loadedAt: string | null;
 }
